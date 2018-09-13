@@ -1,0 +1,95 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<div id="pitch" style="margin: auto; width:600px; height: 800px; background-image: url('./pitch.jpg'); background-size: cover; position:relative;">
+	<div id="player1"><canvas id="chart1"></canvas></div>
+	<div id="player2"><canvas id="chart2"></canvas></div>
+	<div id="player3"><canvas id="chart3"></canvas></div>
+	<div id="player4"><canvas id="chart4"></canvas></div>
+	<div id="player5"><canvas id="chart5"></canvas></div>
+	<div id="player6"><canvas id="chart6"></canvas></div>
+	<div id="player7"><canvas id="chart7"></canvas></div>
+	<div id="player8"><canvas id="chart8"></canvas></div>
+	<div id="player9"><canvas id="chart9"></canvas></div>
+	<div id="player10"><canvas id="chart10"></canvas></div>
+	<div id="player11"><canvas id="chart11"></canvas></div>
+	<div id="player1name"></div>
+	<div id="player2name"></div>
+	<div id="player3name"></div>
+	<div id="player4name"></div>
+	<div id="player5name"></div>
+	<div id="player6name"></div>
+	<div id="player7name"></div>
+	<div id="player8name"></div>
+	<div id="player9name"></div>
+	<div id="player10name"></div>
+	<div id="player11name"></div>
+</div>
+<script>
+
+Chart.defaults.scale.gridLines.display = false;
+Chart.defaults.scale.ticks.display = false;
+
+var chart_max_width = 150;
+
+$.getJSON("wc-final.json", function(players) {
+	i=0;
+    for (var playerId in players){
+    	i++;
+    	var data = [];
+    	for(var k=0;k<20;k++){
+    		data.push(players[playerId]["angles"][k]["nb"]);
+    	}
+    	var playerData = { labels: [], datasets: [{ data: data, borderWidth: 0.3, hoverBorderWidth: 1, backgroundColor: "rgba(255,165,0,0.8)" }]};
+
+    	var chartname = "chart"+i;
+    	var canvas = document.getElementById(chartname);
+    	var polarAreaChart = new Chart(canvas, {
+			type: 'polarArea',
+			data: playerData,
+			options: {
+				maintainAspectRatio: false,
+			    title: {
+			    	display: false,
+			    	text: players[playerId]['name'],
+			    	fontColor: "#000000",
+			    	position: "bottom"
+			    },
+			    scale: {
+			    	reverse: false,
+        			ticks: {
+                		min: 0,
+                		max: 5
+            		}
+            	}
+			}
+		});
+
+		var divname = "player"+i;
+    	var div = document.getElementById(divname);
+    	div.style.width = chart_max_width;
+		div.style.height = chart_max_width;
+		div.style.zIndex = 10;
+		// div.style.border = "5px solid #0000FF";
+		div.style.position = "absolute";
+		div.style.left = players[playerId]["positions"]["avgy"]/80*552 +24 - chart_max_width/2;
+		div.style.top = 800 - (players[playerId]["positions"]["avgx"]/120*710 +45) - chart_max_width/2;
+		var divname = "player"+i+"name";
+    	var div = document.getElementById(divname);
+    	div.innerHTML = players[playerId]['name'];
+    	// div.style.border = "5px solid #FF0000";
+    	div.style.width = chart_max_width;
+    	div.style.textAlign = "center";
+    	div.style.fontFamily = "Arial";
+        div.style.fontWeight = "Bold";
+    	div.style.zIndex = 1;
+		
+		div.style.position = "absolute";
+		div.style.left = players[playerId]["positions"]["avgy"]/80*552 +24 - chart_max_width/2;
+		div.style.top = 800 - (players[playerId]["positions"]["avgx"]/120*710 +45);
+
+    }
+});
+
+
+</script>
