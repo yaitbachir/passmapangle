@@ -30,7 +30,7 @@
 Chart.defaults.scale.gridLines.display = false;
 Chart.defaults.scale.ticks.display = false;
 
-var chart_max_width = 150;
+var chart_max_width = 300;
 
 $.getJSON("wc-final.json", function(players) {
 	i=0;
@@ -59,7 +59,7 @@ $.getJSON("wc-final.json", function(players) {
 			    	reverse: false,
         			ticks: {
                 		min: 0,
-                		max: 5
+                		max: 13
             		}
             	}
 			}
