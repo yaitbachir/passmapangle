@@ -25,6 +25,7 @@
 	<div id="player10name"></div>
 	<div id="player11name"></div>
 </div>
+<div id="legend" style="width:150px;height:50px; background-image:linear-gradient(to right,#FEFB39,#B806F4);"></div>
 <script>
 
 Chart.defaults.scale.gridLines.display = false;
@@ -32,18 +33,88 @@ Chart.defaults.scale.ticks.display = false;
 
 var chart_max_width = 300;
 
+function hslToRgb(h, s, l){
+    var r, g, b;
+
+    if(s == 0){
+        r = g = b = l; // achromatic
+    }else{
+        var hue2rgb = function hue2rgb(p, q, t){
+            if(t < 0) t += 1;
+            if(t > 1) t -= 1;
+            if(t < 1/6) return p + (q - p) * 6 * t;
+            if(t < 1/2) return q;
+            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+
+function numberToColor(i) {
+	var colorsGradients = [
+	'rgba(254, 251, 57, 0.8)',
+	'rgba(247, 226, 75, 0.8)',
+	'rgba(240, 202, 94, 0.8)',
+	'rgba(240, 202, 94, 0.8)',
+	'rgba(226, 153, 131, 0.8)',
+	'rgba(219, 128, 150, 0.8)',
+	'rgba(212, 104, 169, 0.8)',
+	'rgba(205, 79, 187, 0.8)',
+	'rgba(198, 55, 206, 0.8)',
+	'rgba(191, 30, 225, 0.8)',
+	'rgba(184, 6, 244, 0.8)'
+];
+    return colorsGradients[Math.floor(10*i)]; 
+}
+
+function getMaxs(players) {
+	var maxL=1;
+	var maxP=1;
+
+	for (var playerId in players){
+		for(var k=0;k<20;k++){
+			if (players[playerId]["angles"][k]["nb"] > maxP ) {
+				maxP = players[playerId]["angles"][k]["nb"];
+			}
+			if (players[playerId]["angles"][k]["avglen"] > maxL ) {
+				maxL = players[playerId]["angles"][k]["avglen"];
+			}
+		}
+	}
+
+	return [maxP,maxL];
+}
+
+
+
+
 $.getJSON("wc-final.json", function(players) {
 	i=0;
+	var maxs = getMaxs(players);
+
     for (var playerId in players){
     	i++;
     	var data = [];
+    	var colors = [];
     	for(var k=0;k<20;k++){
     		data.push(players[playerId]["angles"][k]["nb"]);
+    		colors.push(numberToColor(players[playerId]["angles"][k]["avglen"]/maxs[1]))
     	}
-    	var playerData = { labels: [], datasets: [{ data: data, borderWidth: 0.3, hoverBorderWidth: 1, backgroundColor: "rgba(255,165,0,0.8)" }]};
+    	
+
 
     	var chartname = "chart"+i;
     	var canvas = document.getElementById(chartname);
+    	var playerData = { labels: [], datasets: [{ data: data, borderWidth: 0.3, hoverBorderWidth: 1, backgroundColor: colors }]};
     	var polarAreaChart = new Chart(canvas, {
 			type: 'polarArea',
 			data: playerData,
@@ -59,7 +130,7 @@ $.getJSON("wc-final.json", function(players) {
 			    	reverse: false,
         			ticks: {
                 		min: 0,
-                		max: 13
+                		max: maxs[0]
             		}
             	}
 			}
@@ -70,14 +141,12 @@ $.getJSON("wc-final.json", function(players) {
     	div.style.width = chart_max_width;
 		div.style.height = chart_max_width;
 		div.style.zIndex = 10;
-		// div.style.border = "5px solid #0000FF";
 		div.style.position = "absolute";
 		div.style.left = players[playerId]["positions"]["avgy"]/80*552 +24 - chart_max_width/2;
 		div.style.top = 800 - (players[playerId]["positions"]["avgx"]/120*710 +45) - chart_max_width/2;
 		var divname = "player"+i+"name";
     	var div = document.getElementById(divname);
     	div.innerHTML = players[playerId]['name'];
-    	// div.style.border = "5px solid #FF0000";
     	div.style.width = chart_max_width;
     	div.style.textAlign = "center";
     	div.style.fontFamily = "Arial";
@@ -87,6 +156,7 @@ $.getJSON("wc-final.json", function(players) {
 		div.style.position = "absolute";
 		div.style.left = players[playerId]["positions"]["avgy"]/80*552 +24 - chart_max_width/2;
 		div.style.top = 800 - (players[playerId]["positions"]["avgx"]/120*710 +45);
+
 
     }
 });
